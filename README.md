@@ -197,9 +197,13 @@ stack@openstack:~/devstack$ openstack flavor list
 ```
 or to create an instance
 ```hcl
-stack@openstack:~/devstack$ ./scripts/server-create.sh
+stack@openstack:~/devstack$ ./scripts/vm.sh vm-1
 ```
 
+and add rules to secury group on project demo
+```hcl
+stack@openstack:~/devstack$ ./scripts/securitygroup-add.sh demo
+```
 
 ## Credits
 
