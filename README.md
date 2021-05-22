@@ -74,7 +74,7 @@ IMPORTANT: Be sure to carefully read stack.sh and any other scripts you execute 
 
 1. After the box has been successfully booted up you can access through SSH just enter `vagrant ssh`
 
-2. Define the password to access openstack
+2. Define the password to access openstack and networking scheme
 ```hcl
 stack@openstack:~/devstack$ vi local.conf 
 [[local|localrc]]
