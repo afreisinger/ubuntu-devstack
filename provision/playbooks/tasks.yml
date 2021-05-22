@@ -1,0 +1,168 @@
+---
+
+# Check Ubuntu release version 
+- name: Check Ubuntu release
+  raw: cat /etc/lsb-release | grep DISTRIB_RELEASE | cut -d "=" -f2
+  register: ubuntu_release
+  changed_when: false
+
+- debug: msg="Running Ubuntu version {{ ubuntu_release.stdout|float }}"
+
+- name: Update apt-get repo and cache
+  apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+- name: Upgrade all apt packages
+  apt: upgrade=dist force_apt_get=yes
+
+- name: Generate locales
+  command: locale-gen {{ item }}
+  with_items: "{{ t3bs.system_locales }}"
+
+- name: Set default locale
+  replace:
+    path: /etc/default/locale
+    regexp: "{{ item.regexp }}"
+    replace: "{{ item.replace }}"
+  with_items:
+    - regexp: "^LANG=.*"
+      replace: "LANG={{ t3bs.default_locale }}"
+    - regexp: "^LANGUAGE=.*"
+      replace: "LANGUAGE={{ t3bs.default_locale.split('.')[0] }}:"
+
+
+# OS software package requirements on configuration.yml
+- name: Install required OS packages
+  apt: name={{ t3bs.requirements | regex_replace('#PHPVER#', t3bs.php_version) }} state=present
+
+
+- name: Install packages 
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+    #- gcc
+    #- python3-pip
+    #- python3-mysqldb 
+    #- python3-dev 
+    #- python3-venv
+    # - python-is-python3
+    #- build-essential 
+    #- libssl-dev 
+    #- libffi-dev 
+    #- libxml2-dev 
+    #- libxslt-dev
+   
+- name: Add the 'stack' user for devstack
+  user:
+    name: stack
+    comment: Dev stack user
+    shell: /bin/bash
+    # Definition of a custom user HOME directory, according to the DevStack recommendation
+    home: /opt/stack
+
+- name: Make 'stack' a privileged user
+  copy:
+    content: "stack ALL=(ALL) NOPASSWD: ALL"
+    dest: /etc/sudoers.d/stack
+    mode: 0440
+
+# Without the `acl` package you may (and probably will) experience permission related issues
+- name: Install acl to fix unprivileged user error
+  package:
+    name: acl
+    state: present
+
+
+- name: Creates directory /opt/stack/devstack
+  file:
+    path: /opt/stack/devstack
+    state: directory
+
+- name: Clone devstack
+  git:
+    repo: 'https://opendev.org/openstack/devstack.git'
+    dest: /opt/stack/devstack
+    version: stable/victoria
+    force: true
+  
+- name: Copying file local.conf
+  copy:
+    src: /vagrant/local.conf
+    dest: /opt/stack/devstack
+    mode: 0644
+
+- name: Creates directory /opt/stack/devstack/scripts
+  file:
+    path: /opt/stack/devstack/scripts
+    state: directory
+
+- name: Copying files *.sh
+  copy:
+    src: /vagrant/scripts/
+    dest: /opt/stack/devstack/scripts
+    mode: 0755
+
+- name: recursively update /devstack directory owner
+  file:
+    path: /opt/stack/devstack
+    state: directory
+    recurse: yes
+    owner: stack
+    group: stack
+    
+- name: Remove old packages autoclean
+  apt:
+     autoclean: yes
+
+- name: Remove old packages autoremove
+  apt:
+     autoremove: yes
+
+- name: Check if a reboot is needed for Debian and Ubuntu boxes
+  register: reboot_required_file
+  stat: path=/var/run/reboot-required get_md5=no
+
+
+
+#Running reboot with local connection would reboot the control node
+#- name: Reboot the Ubuntu server
+#  reboot:
+#    msg: "Reboot initiated by Ansible due to kernel updates"
+#    connect_timeout: 5
+#    reboot_timeout: 600
+#    pre_reboot_delay: 0
+#    post_reboot_delay: 30
+#    test_command: uptime
+#
+#  when: reboot_required_file.stat.exists
+- name: Test if DevStack is installed by checking /opt/stack/tempest existence
+  shell:
+    # According to the https://docs.openstack.org/devstack/victoria#profit
+    # /opt/stack/tempest dir should exist after devstack installation is completed
+    # this is not an ideal way of testing but at least it is something
+    cmd: 'test -d "/opt/stack/tempest" && echo "yes" || echo "no"'
+      # Save command result to Ansible variable
+  register: is_devstack_installed
+  ignore_errors: true
+
+- debug: var=is_devstack_installed
+
+
+
+#- name: Install devstack, this step may take up to 30 minutes or even more
+  # Use Ansible variable to check if installation should be executed
+#  when: is_devstack_installed.stdout == "no"
+#  shell:
+#    cmd: |
+#      sudo su - stack <<EOF
+#      cd /opt/stack/devstack
+#      ./stack.sh
+#      EOF
+  
+#  register: devstack_output
+
+#- debug: var=devstack_output.stdout_lines
+
+

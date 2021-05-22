@@ -1,0 +1,116 @@
+# ##################################################################
+# Bootstrap Package
+# Provisioning Configuration
+# ##################################################################
+
+#
+# General settings
+#
+# The base box used for provisioning should not be changed unless you know what
+# you are doing. If you want to use a different box, keep in mind that the
+# predefined ansible tasks are optimized for Ubuntu and may fail when using a
+# base box other than a Ubuntu box.
+#
+box: ubuntu/focal64
+#version: 20210415.0.0
+version: 20210513.0.0
+server_admin: afreisinger@gmail.com
+
+
+ 
+#
+# Enable/disable automatic virtualbox guest additions update
+#
+# You generally don't need to enable this option unless the current version of
+# your vagrant box is really old and uses an outdated version of the virtualbox
+# guest additions.
+#
+vbguest_auto_update: falsevagrant 
+#
+# Virtual machine settings
+#vagrant 
+# The default options should be sufficient in most cases but it may be possible
+# that the virtual machine runs out of memory if doing memory consuming tasks.
+# In case this happens just boost up the memory to 2GB (2048).
+#
+memory: 16384
+cpus: 4
+disksize: 50GB
+#
+# Network Settings
+#
+# Feel free to edit the hostname and/or IP address to your liking.
+#
+
+hostname: openstack
+ip: 10.0.1.15
+# Enable/disable TLS encryption
+#
+use_tls: false
+
+#
+# Settings
+#
+#
+typo3_version: ^20.04
+typo3_site_name: OpenStack
+
+#
+# 
+#
+# System locales to install
+#
+# Notice: en_US locale is already installed
+
+system_locales:
+  - en_US.UTF-8
+
+#
+# Default system locale
+#
+default_locale: en_US
+#
+# Linked Clone for Vagrant v1.8
+#
+# For more information about this option check the Vagrant documentation
+#
+# https://www.vagrantup.com/docs/virtualbox/configuration.html#linked-clones
+#
+linked_clone: false
+
+
+#
+# OS software package requirements
+#
+# Do not remove any of the default packages.
+#
+# You should not need to modify this list anyway as long as you
+# don't add community extensions that have dependencies on
+# additional system packages.
+#
+requirements:
+  - git
+  - curl
+  - lsb-release
+  - cowsay
+  - net-tools
+  - arping
+  - network-manager
+  - john
+  - traceroute
+  - bridge-utils
+  - nftables
+  
+
+#
+# Do not change these settings unless you know what you are doing
+#
+#synced_folder: site
+#document_root: /var/www
+www_user: vagrant
+www_group: www-data
+www_user_home: /home/vagrant
+#composer_bin_path: /usr/local/bin
+#composer_bin: composer
+#php_bin_path: /usr/bin
+#xdebug_profiler_output_dir: /vagrant/profiler

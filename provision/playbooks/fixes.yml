@@ -1,0 +1,25 @@
+---
+
+- name: Specifying a path directly
+  copy:
+    src: /opt/stack/devstack/lib/neutron-legacy
+    dest: /opt/stack/devstack/lib/neutron-legacy.bup
+    
+
+- name: Specifying a path directly
+  copy:
+    src: /opt/stack/devstack/tools/worlddump.py
+    dest: /opt/stack/devstack/tools/worlddump.py.bup
+    
+
+- name: Copying file neutron-legacy
+  copy:
+    src: /vagrant/files/neutron-legacy
+    dest: /opt/stack/devstack/lib
+    mode: 0644
+
+- name: Copying file worldump.py
+  copy:
+    src: /vagrant/files/worlddump.py
+    dest: /opt/stack/devstack/tools
+    mode: 0644

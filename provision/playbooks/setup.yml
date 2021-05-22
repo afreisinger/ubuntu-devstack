@@ -1,0 +1,11 @@
+---
+- hosts: all
+  become: yes
+  become_user: root
+# handlers:
+#   - import_tasks: handlers.yml
+
+  tasks:
+    - import_tasks: tasks.yml
+    - import_tasks: fixes.yml
+

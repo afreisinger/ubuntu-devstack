@@ -168,7 +168,7 @@ We can use the openstack via Web UI(Horizon) or Openstack CLI.
 By default demo project is created with "demo" user. The default admistrative username is admin. we have specified the password in local.conf file. In my example, it is "secret".
 
 Horizon
-1. Access with UI http://10.0.1.1.15
+1. Access with UI http://10.0.1.15
 
 CLI
 
